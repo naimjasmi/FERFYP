@@ -54,7 +54,7 @@ def stop_detection():
 def about():
     return render_template('about.html')
 
-# Serve images statically
+# Serve images staticallya
 @app.route('/images/<path:path>')
 def static_images(path):
     return send_from_directory('images', path)
