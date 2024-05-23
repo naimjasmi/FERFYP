@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        #video-feed {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+    <title>Facial Emotion Recognition</title>
+</head>
+<body>
+    <div id="emotion-label"></div>
+    <div id="video-container">
+         
+    </div>
+    <script>
+        const video = document.getElementById('video-feed');
+        const emotionLabelDiv = document.getElementById('emotion-label');
+
+        const source = new EventSource("/video_feed");
+        source.onmessage = function(event) {
+            const [imageData, emotionLabel] = event.data.split(' ');
+            video.src = 'data:image/jpeg;base64,' + imageData;
+            emotionLabelDiv.innerText = emotionLabel;
+        };
+    </script>
+</body>
+</html>

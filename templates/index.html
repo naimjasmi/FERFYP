@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles-index.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Emotion Detection</title>
+</head>
+
+<body>
+    <header>
+        <h5>Facial Emotion Detection</h5>
+    </header>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <div class="dropdown">
+
+            <div class="dropdown-content">
+                <a href="#" onclick="showSuggestionPanel('Angry')">Angry</a>
+                <a href="#" onclick="showSuggestionPanel('Sad')">Sad</a>
+                <a href="#" onclick="showSuggestionPanel('Happy')">Happy</a>
+                <a href="#" onclick="showSuggestionPanel('Neutral')">Neutral</a>
+                <a href="#" onclick="showSuggestionPanel('Fear')">Fear</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="panel-container">
+        <div id="emotion-pie-chart-container">
+            <!-- Placeholder for the Pie Chart -->
+            <canvas id="emotion-pie-chart"></canvas>
+        </div>
+
+        <div id="video-feed-container">
+            <img id="video-feed" />
+            <div id="emotion-label"></div>
+
+            <div id="controls">
+                <button onclick="startDetection()">Start</button>
+                <button onclick="stopDetection()">Stop</button>
+                <button onclick="resetPieChart()">Reset</button>
+                <button onclick="printResult()">Result</button>
+            </div>
+
+        </div>
+
+        <div id="suggestion-panel">
+            <!-- Default suggestion card -->
+            <div class="suggestion-card">
+                <h4 style="text-align: left;">Welcome!</h4>
+                <p>
+                    Please select an emotion to see personalized suggestions.
+                </p>
+            </div>
+            <!-- This will be populated with suggestion cards based on the selected emotion -->
+        </div>
+    </div>
+
+    <!-- Bootstrap Modal Dialog for Result -->
+    <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultModalLabel">Emotion Detection Result</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="resultModalBody">
+                    <!-- Result content will be inserted here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const source = new EventSource("/video_feed");
+        const pieChartCanvas = document.getElementById("emotion-pie-chart");
+        const ctx = pieChartCanvas.getContext("2d");
+        let emotionData = {};
+        let detectionStartTime = null;
+
+        // Initialize Pie Chart
+        const pieChart = new Chart(ctx, {
+            type: 'doughnut', // Use 'doughnut' instead of 'pie'
+            data: {
+                labels: ['Angry', 'Sad', 'Happy', 'Neutral', 'Fear'],
+                datasets: [{
+                    data: [0, 0, 0, 0, 0],
+                    backgroundColor: ['#860A35', '#F3B664', '#A6CF98', '#D0A2F7', '#427D9D'],
+                    pointStyle: 'circle', // Set pointStyle to 'circle' for circular labels
+                    borderWidth: 0, // Remove border around the labels 
+                }]
+            },
+            options: {
+                cutoutPercentage: '80%', // Adjust cutoutPercentage for the thickness of the doughnut
+                legend: {
+                    display: false 
+                }
+            }
+        });
+
+        source.onmessage = function (event) {
+            const [imageData, emotionLabel] = event.data.split(' ');
+
+            // Update Pie Chart data
+            updatePieChartData(emotionLabel);
+
+            document.getElementById("video-feed").src = 'data:image/jpeg;base64,' + imageData;
+            document.getElementById("emotion-label").innerText = emotionLabel;
+        };
+
+        function updatePieChartData(emotionLabel) {
+            if (emotionLabel !== 'NoFaceDetected') {
+                emotionData[emotionLabel] = (emotionData[emotionLabel] || 0) + 1;
+
+                const dataValues = ['Angry', 'Sad', 'Happy', 'Neutral', 'Fear'].map(label =>
+                    emotionData[label] || 0
+                );
+
+                pieChart.data.datasets[0].data = dataValues;
+                pieChart.update();
+            }
+        }
+
+        function startDetection() {
+            detectionStartTime = new Date();
+            fetch('/start_detection', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Emotion detection started');
+                    } else {
+                        console.error('Failed to start emotion detection');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function stopDetection() {
+            const endTime = new Date();
+            const durationInSeconds = Math.floor((endTime - detectionStartTime) / 1000);
+            fetch('/stop_detection', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Emotion detection stopped');
+                    } else {
+                        console.error('Failed to stop emotion detection');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function printResult() {
+            if (!detectionStartTime) {
+                alert('Emotion detection has not started yet.');
+                return;
+            }
+
+            const endTime = new Date();
+            const durationInSeconds = Math.floor((endTime - detectionStartTime) / 1000);
+
+            // Fetch the emotion results within the entire detection period
+            const emotionsWithinDetectionPeriod = Object.assign({}, emotionData);
+
+            // Calculate the total count of all emotions within the detection period
+            const totalCount = Object.values(emotionsWithinDetectionPeriod).reduce((total, count) => total + count, 0);
+
+            // Create an object with emotion colors
+            const emotionColors = {
+                'Angry': '#860A35',
+                'Sad': '#F3B664',
+                'Happy': '#A6CF98',
+                'Neutral': '#D0A2F7',
+                'Fear': '#427D9D'
+            };
+
+            // Calculate the percentage of each emotion within the detection period
+            const emotionPercentages = Object.entries(emotionsWithinDetectionPeriod).map(([emotion, count]) => {
+                const percentage = (count / totalCount) * 100;
+                const color = emotionColors[emotion];
+                return `<div class="result-item">
+                            <span class="color-indicator" style="background-color: ${color};"></span>
+                            <span class="emotion-label">${emotion}:</span> 
+                            <span class="percentage">${percentage.toFixed(2)}%</span>
+                        </div>`;
+            });
+
+            // Display the result in the Bootstrap modal dialog
+            const resultModalBody = document.getElementById('resultModalBody');
+            resultModalBody.innerHTML = `
+                <div class="result-summary">
+                    <p>Total Detection Period: ${formatDuration(durationInSeconds)}</p>
+                </div>
+                <div class="result-details">
+                    ${emotionPercentages.join('\n')}
+                </div>
+            `;
+
+            $('#resultModal').modal('show');
+        }
+
+        function resetPieChart() {
+            emotionData = {}; // Reset emotion data
+            const dataValues = [0, 0, 0, 0, 0];
+            pieChart.data.datasets[0].data = dataValues;
+            pieChart.update();
+
+            // Reset detection start time
+            detectionStartTime = null;
+        }
+
+        function formatDuration(durationInSeconds) {
+            const minutes = Math.floor(durationInSeconds / 60);
+            const seconds = durationInSeconds % 60;
+            return `${minutes} minutes ${seconds} seconds`;
+        }
+
+        function showSuggestionPanel(emotion) {
+            // Fetch suggestion content based on the selected emotion and update the suggestion-panel div
+            const suggestionPanel = document.getElementById('suggestion-panel');
+            suggestionPanel.innerHTML = getSuggestionContent(emotion);
+            suggestionPanel.style.display = 'block';
+        }
+
+        function getSuggestionContent(emotion) {
+            // Return suggestion content based on the selected emotion
+            switch (emotion) {
+                case 'Angry':
+                    return '<div class="suggestion-card angry">' +
+                        '<h4>Angry</h4>' +
+                        '<ul>' +
+                        '   <li>Provide a calm and safe space for the student to express their feelings.</li>' +
+                        '   <li>Encourage deep breaths and explore the root cause of the anger.</li>' +
+                        '   <li>Consider suggesting physical activities like walking to release built-up tension.</li>' +
+                        '</ul>' +
+                        '<p>' +
+                        '   It is essential to address anger in a constructive manner. Creating a safe environment for the student ' +
+                        '   to express their emotions helps build trust. Encourage them to take deep breaths, providing a moment ' +
+                        '   for reflection. Exploring the root cause of the anger can lead to a better understanding and resolution.' +
+                        '   Additionally, suggesting physical activities like walking can be effective in releasing built-up tension.' +
+                        '</p>' +
+                        '</div>';
+                case 'Sad':
+                    return '<div class="suggestion-card sad">' +
+                        '<h4>Sad</h4>' +
+                        '<ul>' +
+                        '   <li>Show empathy and offer support.</li>' +
+                        '   <li>Encourage the student to talk about their feelings and consider involving a support network.</li>' +
+                        '   <li>Additionally, recommend engaging in activities that bring comfort, such as listening to music or reading.</li>' +
+                        '</ul>' +
+                        '<p>' +
+                        '   When a student is feeling sad, it is crucial to express empathy and provide a supportive atmosphere. ' +
+                        '   Actively listen to their concerns and offer emotional support. Encouraging them to talk about their feelings ' +
+                        '   and involving a support network can help alleviate the emotional burden. Recommend activities that bring comfort, ' +
+                        '   such as listening to soothing music or engaging in a good book.' +
+                        '</p>' +
+                        '</div>';
+                case 'Happy':
+                    return '<div class="suggestion-card happy">' +
+                        '<h4>Happy</h4>' +
+                        '<ul>' +
+                        '   <li>Acknowledge achievements and positive aspects in the student\'s life.</li>' +
+                        '   <li>Encourage activities that bring joy and fulfillment.</li>' +
+                        '   <li>Suggest celebrating small victories and engaging in hobbies to maintain a positive mindset.</li>' +
+                        '</ul>' +
+                        '<p>' +
+                        '   Celebrate moments of happiness with the student by acknowledging their achievements and positive aspects ' +
+                        '   in their life. Encourage them to participate in activities that bring joy and fulfillment. Suggest celebrating ' +
+                        '   small victories as a way to maintain a positive mindset. Engaging in hobbies and enjoyable activities can ' +
+                        '   contribute to an overall sense of well-being.' +
+                        '</p>' +
+                        '</div>';
+                case 'Neutral':
+                    return '<div class="suggestion-card neutral">' +
+                        '<h4>Neutral</h4>' +
+                        '<ul>' +
+                        '   <li>Offer a listening ear without judgment.</li>' +
+                        '   <li>Help the student explore their emotions and thoughts without pushing for a specific reaction.</li>' +
+                        '   <li>Provide a supportive environment for self-reflection and expression.</li>' +
+                        '</ul>' +
+                        '<p>' +
+                        '   When a student expresses neutrality, it is essential to offer a non-judgmental listening ear. Allow them ' +
+                        '   to explore their emotions and thoughts at their own pace, without pushing for a specific reaction. Create a ' +
+                        '   supportive environment for self-reflection and expression, fostering a sense of safety and trust.' +
+                        '</p>' +
+                        '</div>';
+                case 'Fear':
+                    return '<div class="suggestion-card fear">' +
+                        '<h4>Fear</h4>' +
+                        '<ul>' +
+                        '   <li>Provide reassurance and a sense of safety.</li>' +
+                        '   <li>Help the student identify and confront specific fears while offering support throughout the process.</li>' +
+                        '   <li>Encourage gradual exposure to fears and consider relaxation techniques.</li>' +
+                        '</ul>' +
+                        '<p>' +
+                        '   Addressing fear requires providing reassurance and creating a sense of safety. Assist the student in identifying ' +
+                        '   and confronting specific fears, offering continuous support throughout the process. Encourage gradual exposure ' +
+                        '   to fears, allowing them to confront and overcome challenges. Consider introducing relaxation techniques to ' +
+                        '   manage anxiety and promote a sense of calm.' +
+                        '</p>' +
+                        '</div>';
+                default:
+                    return '';
+            }
+        }
+
+    </script>
+
+    <div id="optimization-panel">
+        <h5><b>For optimal experience, please make sure that:</b></h5>
+        <div class="optimization-cards-container">
+            <div class="optimization-card">
+                <h5>Your camera is located on the top of your screen</h5>
+                <p>Ensure that your camera is positioned at the top of your screen for better facial detection.</p>
+            </div>
+            <div class="optimization-card">
+                <h5>Subjects are facing the camera</h5>
+                <p>Make sure that the subjects are facing the camera directly to improve emotion detection accuracy.</p>
+            </div>
+            <div class="optimization-card">
+                <h5>Subjects are in a well-lit room</h5>
+                <p>Optimal lighting conditions enhance the accuracy of emotion detection. Ensure a well-lit environment.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles-homepage.css') }}">
+    <title>Emotion Detection</title>
+
+</head>
+<body>
+
+<!-- Decorative shapes -->
+<div class="decorative-shapes">
+    <!-- Vertical line -->
+    <div class="decorative-line"></div>
+    <!-- Circle -->
+    <div class="decorative-circle"></div>
+    <!-- Square -->
+    <div class="decorative-square"></div>
+</div>
+
+<div class="panel">
+    <div class="panel-text">
+        <h2>EXPLORE EMOTION</h2>
+        <p>
+            Discover the innovative world of facial emotion recognition tailored for school counselors. 
+            Our advanced system utilizes state-of-the-art technology to analyze emotions accurately and 
+            provide valuable insights. Delve into the intersection of artificial intelligence and emotional 
+            intelligence as we empower school counselors to support students more effectively. Join us on a 
+            journey to explore the transformative potential of facial emotion recognition in educational settings.
+        </p>
+        <div class="button-container">
+            <button onclick="location.href='/homepage'">Start Detection</button>
+        </div>
+    </div>
+    <div class="slider">
+        <div class="slides">
+            <div class="slide">
+                <img src="images/HP1.jpg" alt="Image 1">
+            </div>
+            <div class="slide">
+                <img src="images/HP2.jpg" alt="Image 2">
+            </div>
+            <div class="slide">
+                <img src="images/HP3.jpg" alt="Image 3">
+            </div>
+        </div>
+        <div class="dots">
+            <span class="dot" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="feature-wrapper">
+        <h2 class="feature-title" style="font-size: 42px;">FEATURES</h2>
+        <div class="feature-cards"  style="margin-top: 55px;">
+            <div class="feature-card">
+                <h3>Real-time Emotion Detection</h3>
+                <p>
+                    Our system offers real-time detection of facial expressions, 
+                    enabling school counselors to immediately recognize and 
+                    respond to students' emotions during counseling sessions or classroom interactions.
+                </p>
+            </div>
+            <div class="feature-card">
+                <h3>Personalized Suggestions</h3>
+                <p>
+                    Through our intuitive interface, counselors can access personalized
+                    suggestions tailored to specific emotions detected, providing valuable 
+                    guidance on how to effectively support students experiencing various emotional states.
+                </p>
+            </div>
+            <div class="feature-card">
+                <h3>Comprehensive Analytics</h3>
+                <p>
+                    Gain insights into emotional trends over time with our comprehensive analytics tools. 
+                    Track changes in student emotions, identify patterns, and inform proactive 
+                    interventions to create a supportive and empathetic school environment.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="about-us-container">
+    <h2>ABOUT US</h2>
+    <p>
+        At Facial Emotion Recognition, we are dedicated to revolutionizing the field of 
+        emotional intelligence in educational settings. Committed to supporting school 
+        counselors in their mission to nurture students' well-being, our team combines 
+        expertise in artificial intelligence, psychology, and education.
+        Driven by the belief that every student deserves access to empathetic support, 
+        our mission is to empower school counselors with cutting-edge technology. With a focus 
+        on innovation and compassion, we strive to create a platform that not only enhances 
+        emotional awareness but also fosters a culture of empathy and understanding in schools.
+        Join us on our journey to transform the way emotions are recognized, understood, 
+        and addressed in educational environments. Together, let's pave the way for a brighter, 
+        more emotionally intelligent future for students everywhere.
+    </p>
+    <div class="button-container">
+        <button onclick="location.href='/about'">Learn More</button>
+    </div>
+</div>
+
+<script>
+    // Function to handle scroll animation
+    window.addEventListener('scroll', function() {
+        const elements = document.querySelectorAll('.panel, .feature-card');
+        elements.forEach(function(element) {
+            if (isElementInViewport(element)) {
+                element.classList.add('visible');
+            }
+        });
+    });
+
+    // Function to check if an element is in the viewport
+    function isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+    }
+
+    // Function to show slides
+    let slideIndex = 0;
+    function showSlides() {
+        let i;
+        const slides = document.getElementsByClassName("slide");
+        const dots = document.getElementsByClassName("dot");
+
+        for (i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
+            dots[i].classList.remove("active");
+        }
+
+        slideIndex++;
+        if (slideIndex >= slides.length) {
+            slideIndex = 0;
+        }
+
+        slides[slideIndex].style.display = "block";
+        dots[slideIndex].classList.add("active");
+    }
+
+    setInterval(showSlides, 3000);
+
+    // Function to change slide on dot click
+    function currentSlide(n) {
+        slideIndex = n - 1;
+        showSlides();
+    }
+</script>
+
+</body>
+</html>

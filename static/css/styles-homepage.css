@@ -1,0 +1,305 @@
+/* Additional styles specific to the homepage */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #214fb0; /* Slightly different shade of dark blue */
+    margin: 0;
+    padding: 0;
+    position: relative; /* Ensure the body can contain absolutely positioned elements */
+}
+
+/* Decorative shapes */
+.decorative-shapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.decorative-circle {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2); /* Lighter color */
+    top: 40%;
+    left: 20%;
+    animation: moveCircle 5s infinite alternate; /* Circle animation */
+}
+
+@keyframes moveCircle {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(20px, 20px);
+    }
+}
+
+.decorative-square {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background-color: rgba(255, 255, 255, 0.2); /* Lighter color */
+    top: 60%;
+    left: 70%;
+    animation: moveSquare 5s infinite alternate; /* Square animation */
+}
+
+@keyframes moveSquare {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(-20px, -20px);
+    }
+}
+
+/* Panels */
+.panel {
+    position: relative; /* Add position relative */
+    padding: 20px;
+    margin: 5px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    min-height: calc(100vh - 40px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, #1A237E, #8a0bbc);
+    color: white;
+    overflow: hidden; /* Add overflow hidden */
+    animation: fadeIn 0.9s ease-in-out;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+/* Add decorative border */
+.panel::before,
+.panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.panel::before {
+    background: linear-gradient(to right, #1A237E, transparent);
+    left: -100%;
+    z-index: -1;
+}
+
+.panel::after {
+    background: linear-gradient(to left, #1A237E, transparent);
+    right: -100%;
+    z-index: -1;
+}
+
+/* Animation for the border */
+.panel::before,
+.panel::after {
+    animation: wave 8s infinite linear;
+}
+
+@keyframes wave {
+    0% {
+        transform: translateX(-100%);
+    }
+    50% {
+        transform: translateX(70%); /* Change halfway point to smooth transition */
+    
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.panel-text {
+    text-align: left;
+    max-width: 50%;
+    margin-left: 40px;
+}
+
+.panel h2 {
+    font-size: 86px;
+    margin-bottom: 15px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1;
+}
+
+.panel p {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.button-container {
+    margin-top: 20px;
+}
+
+.button-container button {
+    background-color: #5AB97B;
+    color: #FEF9E0;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16px;
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button-container button:hover {
+    background-color: #82D89A;
+    color: #FEF9E0;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.feature-wrapper {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.feature-title {
+    margin-top: 10px;
+}
+
+.feature-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.feature-card {
+    flex: 0 0 calc(30% - 100px);
+    margin-bottom: 20px;
+    margin-right: 20px;
+    background-color: #1A237E;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: white;
+    transition: transform 0.3s;
+}
+
+.feature-card h3 {
+    color: white;
+    font-size: 20px;
+    margin-top: 0;
+}
+
+.feature-card p {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.about-us-container {
+    background-color: #303F9F;
+    margin: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    min-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white; /* Added to ensure text color is white */
+}
+
+.about-us-container h2 {
+    font-size: 36px; /* Increased font size */
+    margin-bottom: 20px;
+}
+
+.about-us-container p {
+    font-size: 18px; /* Increased font size */
+    line-height: 1.6;
+    margin: 0 auto 20px auto; /* Added margin */
+    max-width: 80%; /* Limited maximum width */
+}
+
+.about-us-container button {
+    background-color: #5AB97B;
+    color: #FEF9E0;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.about-us-container button:hover {
+    background-color: #82D89A;
+    color: #FEF9E0;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Image Slider Styles */
+.slider {
+    max-width: 600px;
+    position: relative;
+    overflow: hidden;
+    margin: 20px auto;
+}
+
+.slides {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.slide {
+    width: 100%;
+    border: 20px solid #4354c4;
+    border-radius: 10px;
+}
+
+.slide img {
+    max-width: 100%;
+    max-height: 350px;
+    vertical-align: top;
+    cursor: pointer;
+}
+
+.dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.dot {
+    height: 10px;
+    width: 10px;
+    background-color: #bbb;
+    border-radius: 50%;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+.active {
+    background-color: #717171;
+}
